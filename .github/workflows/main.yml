@@ -23,13 +23,14 @@ jobs:
       # 3. Build & push Docker image
       - name: Build and Push Docker image
         run: |
-          IMAGE=${{ secrets.DOCKER_USERNAME }}/react-docker-app:${{ github.sha }}
-          IMAGE_LATEST=${{ secrets.DOCKER_USERNAME }}/react-docker-app:latest
+          IMAGE="${{ secrets.DOCKER_USERNAME }}/react-docker-app:${{ github.sha }}"
+          IMAGE_LATEST="${{ secrets.DOCKER_USERNAME }}/react-docker-app:latest"
           
-          echo "Building and pushing Docker images..."
-          docker build -t $IMAGE -t $IMAGE_LATEST .
-          docker push $IMAGE
-          docker push $IMAGE_LATEST
+          echo "Using image: $IMAGE_LATEST"
+          
+          docker build -t "$IMAGE" -t "$IMAGE_LATEST" .
+          docker push "$IMAGE"
+          docker push "$IMAGE_LATEST"
           
           echo "IMAGE=$IMAGE_LATEST" >> $GITHUB_ENV
 
@@ -47,6 +48,8 @@ jobs:
       # 6. Deploy to Azure Container App
       - name: Deploy to Azure Container App
         run: |
+          echo "Deploying $IMAGE to Azure Container App: ${{ secrets.AZURE_CONTAINERAPP_NAME }}"
           az containerapp update \
-            --name ${{ secrets.AZURE_CONTAINERAPP_NAME }} \
-            --
+            --name "${{ secrets.AZURE_CONTAINERAPP_NAME }}" \
+            --resource-group "${{ secrets.AZURE_RG }}" \
+            --image "$IMAGE"
