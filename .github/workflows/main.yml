@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # allows manual trigger from Actions tab
+  workflow_dispatch: # optional manual trigger from Actions tab
 
 env:
   REGISTRY: ${{ secrets.ACR_LOGIN_SERVER }}
@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout your code
+      # 1️⃣ Checkout your repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Login to Azure
+      # 2️⃣ Login to Azure using Service Principal (from AZURE_CREDENTIALS secret)
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -29,7 +29,7 @@ jobs:
       - name: Login to Azure Container Registry
         run: az acr login --name ${{ secrets.ACR_NAME }}
 
-      # 4️⃣ Build Docker image and tag
+      # 4️⃣ Build Docker image and tag (commit SHA + latest)
       - name: Build Docker image
         run: |
           docker build -t $REGISTRY/${{ env.IMAGE_NAME }}:${{ github.sha }} .
